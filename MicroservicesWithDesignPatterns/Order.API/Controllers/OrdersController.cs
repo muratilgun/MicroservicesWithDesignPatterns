@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Order.API.DTOs;
 using Order.API.Models;
 using System.Threading.Tasks;
+using MassTransit;
 using Shared;
 
 namespace Order.API.Controllers
@@ -13,10 +14,11 @@ namespace Order.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public OrdersController(AppDbContext context)
+        private readonly IPublishEndpoint _publishEndpoint;
+        public OrdersController(AppDbContext context, IPublishEndpoint publishEndpoint)
         {
             _context = context;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpPost]
@@ -57,7 +59,7 @@ namespace Order.API.Controllers
                 });
             });
 
-
+            await _publishEndpoint.Publish(orderCreatedEvent); 
             return Ok();
         }
     }
