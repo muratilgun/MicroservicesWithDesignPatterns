@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Stock.API.Models;
 
 namespace Stock.API
 {
@@ -13,7 +15,17 @@ namespace Stock.API
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                context.Stocks.Add(new Models.Stock{ Id = 1, ProductId = 1, Count = 100 });
+                context.Stocks.Add(new Models.Stock{ Id = 2, ProductId = 2, Count = 100 });
+                context.SaveChanges();
+            }
+
+            host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
