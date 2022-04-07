@@ -9,6 +9,7 @@ namespace Stock.API.Consumers
 {
     public class OrderCreatedEventConsumer :  IConsumer<OrderCreatedEvent>
     {
+
         public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
         {
             throw new NotImplementedException();
