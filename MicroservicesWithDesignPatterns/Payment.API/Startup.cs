@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
+using Payment.API.Consumer;
+using Shared;
 
 namespace Payment.API
 {
@@ -26,8 +29,20 @@ namespace Payment.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<StockReservedEventConsumer>();
+                x.UsingRabbitMq((contex, cfg) =>
+                {
+                    cfg.Host(Configuration.GetConnectionString("RabbitMQ"));
+                    cfg.ReceiveEndpoint(RabbitMQSettingsConst.StockReservedEventQueueName, e =>
+                    {
+                        e.ConfigureConsumer<StockReservedEventConsumer>(contex);
+                    });
+                });
+            });
             services.AddControllers();
+            services.AddMassTransitHostedService();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Payment.API", Version = "v1" });
