@@ -22,7 +22,7 @@ namespace Payment.API.Consumer
             if (balance> context.Message.Payment.TotalPrice)
             {
                 _logger.LogInformation($"{context.Message.Payment.TotalPrice} TL was withdrawn from credit card for user id = {context.Message.BuyerId}");
-                await _publishEndpoint.Publish(new PaymentSuccessedEvent {BuyerId = context.Message.BuyerId, OrderId = context.Message.OrderId});
+                await _publishEndpoint.Publish(new PaymentCompletedEvent { BuyerId = context.Message.BuyerId, OrderId = context.Message.OrderId});
             }
             else
             {
