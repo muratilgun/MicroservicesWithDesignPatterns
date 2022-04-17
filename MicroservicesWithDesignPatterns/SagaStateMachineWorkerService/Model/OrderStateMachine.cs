@@ -12,6 +12,7 @@ namespace SagaStateMachineWorkerService.Model
         public OrderStateMachine()
         {
             InstanceState(x => x.CurrentState);
+
             Event(() => OrderCreatedRequestEvent, y => y.CorrelateBy<int>(x => x.OrderId, z => z.Message.OrderId).SelectId(context => Guid.NewGuid()));
 
             Initially(When(OrderCreatedRequestEvent).Then(context =>
@@ -24,7 +25,9 @@ namespace SagaStateMachineWorkerService.Model
                 context.Instance.CVV = context.Data.Payment.CVV;
                 context.Instance.Expiration = context.Data.Payment.Expiration;
                 context.Instance.TotalPrice = context.Data.Payment.TotalPrice;
-            }).Then(context => {Console.WriteLine($"OrderCreatedRequestEvent before : {context.Instance}");}).TransitionTo(OrderCreated).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }));
+            }).Then(context => {Console.WriteLine($"OrderCreatedRequestEvent before : {context.Instance}");})
+                .TransitionTo(OrderCreated)
+                .Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }));
         }
     }
 }

@@ -47,7 +47,7 @@ namespace SagaStateMachineWorkerService
                         }));
                     });
 
-
+                    services.AddMassTransitHostedService();
                     services.AddHostedService<Worker>();
                 });
     }
