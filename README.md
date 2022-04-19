@@ -1,6 +1,23 @@
 # MicroservicesWithDesignPatterns
 Saga Design Pattern, Event Sourcing Pattern, Retry Pattern, Circuit Breaker Pattern, API Composition Pattern
 
+Giriş => 
+Microservice mimarilerinde ideal olarak her bir servisin kendine ait bir veritabanı olması gerekmektedir. İşte bu birden fazla servise dağıtılmış veritabanı sistemi distributed transaction olarak nitelendirilmektedir. Her servisin kendine ait bir veritabanı olması dolayısıyla bu veritabanların arasında yapılan işe/hizmete göre bütünsel bir veri tutarlılığının sağlanmasını gerektirmektedir.
+Farz edelim ki bir e-ticaret yazılımı geliştiriyoruz. Bu yazılımın sipariş alma işlemlerini ‘Order’, siparişten sonra stok işlemlerini ‘Stock’ ve son olarak da ödeme işlemlerini ‘Payment’ servislerinde yaptığımızı düşünelim. Tabi ki de tüm bu servisin kendilerine ait veritabanları olduğunu düşünelim ve senaryotik açıdan akışın şu şekilde olduğunu düşünürsek ;
+
+`Kullanıcı herhangi bir ürüne dair sipariş verdiğinde ‘Order’ servisi bu işlemi gerçekleştirecek ve kendi veritabanına ekleyecektir. ‘Payment’ servisi ise ödemeyi sağlayacak ve ödeme başarılıysa ‘Stock’ servisinde ki ilgili ürüne karşılık gelen stok miktarını düşürecektir.`
+
+Şimdi bu işlem sırasında, ‘Order’ servisi gelen siparişi oluşturduktan sonra ‘Payment’ servisi o siparişe dair ödemeyi başarılı gerçekleştirirse eğer ‘Stock’ servisinde siparişteki ilgili ürüne dair stok adedinin düşürülmesi gerekmektedir. Aksi taktirde bir tutarsızlık meydana gelecektir. Düşünsenize, sipariş verilip ödeme yapıldıktan sonra hala stok miktarı aynı kalmaktadır. Bu durumun yazılımdaki verisel istatistiklere ve o yazılımı kullanan işletmeye verdiği zararı düşünün!
+
+İşte  birden fazla serviste birden fazla veritabanıyla çalışılması(distributed transaction) durumlarında veri tutarlılığının sağlanmasından kastedilen budur.Distributed transaction senaryolarında bu bahsedilen veri tutarlılığının sağlanabilmesi için önerilen çözümlerden biri olan Saga patterndir.
+### Transaction, Distributed Transaction ve Compensable Transactions Nedir?
+* #### Transaction
+Transaction, veritabanı üzerinde yapılan tüm işlemlere verilen genel isimdir.
+* #### Distributed Transaction
+Distributed Transactionlar birden fazla farklı veritabanının bir bütün olarak çalıştığı durumu ifade eder. Bu terim dağıtılmış veritabanı sistemleri için kullanılmaktadır.  Genellikle microservice gibi yaklaşımlarda her bir servisin kendi veritabanını taşıması distributed transaction olarak nitelendirilir.
+* #### Compensable Transaction
+Compensable Transaction ise, bir transaction’ın yapmış olduğu işlemin tersini almaktır. Yani commit edilen bir işlemin geriye dönüklüğü bu saatten sonra ancak telafi ile mümkündür. İşte bu geri dönük telafi işlemine compensable transactions denmektedir. Misal olarak; ‘A’ servisi yapmış olduğu bir işlemi ‘B’ servisindeki duruma göre iptal etmek zorundaysa ‘A’ servisi bunu ancak yapılan işin tam tersini alarak gerçekleştirebilmektedir. Örneğin, 100 değerine +10 eklendiyse, bu işlemin iptali -10 eklenmesidir. Bu kavramın teknik olarak Saga pattern’ın da çok kullanılır.
+
 Saga Pattern Nedir?
 Saga Pattern ile oluşturulan sistemlerde gelen istek ile daha sonraki her adım, bir önceki adımın başarılı şekilde tamamlanması sonrasında tetiklenir. Herhangi bir failover durumunda işlemi geri alma veya bir düzeltme aksiyonu almayı sağlayan pattern’dir.
 SAGA TÜRLERİ
