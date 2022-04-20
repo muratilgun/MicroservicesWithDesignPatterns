@@ -17,7 +17,17 @@ Transaction, veritabanı üzerinde yapılan tüm işlemlere verilen genel isimdi
 Distributed Transactionlar birden fazla farklı veritabanının bir bütün olarak çalıştığı durumu ifade eder. Bu terim dağıtılmış veritabanı sistemleri için kullanılmaktadır.  Genellikle microservice gibi yaklaşımlarda her bir servisin kendi veritabanını taşıması distributed transaction olarak nitelendirilir.
 * #### Compensable Transaction
 Compensable Transaction ise, bir transaction’ın yapmış olduğu işlemin tersini almaktır. Yani commit edilen bir işlemin geriye dönüklüğü bu saatten sonra ancak telafi ile mümkündür. İşte bu geri dönük telafi işlemine compensable transactions denmektedir. Misal olarak; ‘A’ servisi yapmış olduğu bir işlemi ‘B’ servisindeki duruma göre iptal etmek zorundaysa ‘A’ servisi bunu ancak yapılan işin tam tersini alarak gerçekleştirebilmektedir. Örneğin, 100 değerine +10 eklendiyse, bu işlemin iptali -10 eklenmesidir. Bu kavramın teknik olarak Saga pattern’ın da çok kullanılır.
+ACID Prensipler
 
+ACID, değişikliklerin bir veri tabanına nasıl uygulanacağını yöneten 4 adet prensip sunar. Bunlar, Atomicity, Consistency, Isolation ve Durability prensipleridir. Bir kaç cümle ile açıklamak gerekirse;
+
+Atomicity: En kısa ifadesiyle ya hep, ya hiç. Arda arda çalışan transaction’lar için iki olası senaryo vardır. Ya tüm transaction’lar başarılı olmalı ya da bir tanesi bile başarısız olursa tümünün iptal edilmesi durumudur.
+
+Consistency: Veri tabanındaki datalarımızın tutarlı olması gerekir. Eğer bir transaction geçersiz bir veri üreterek sonuçlanmışsa, veri tabanı veriyi en son güncel olan haline geri alır. Yani bir transaction, veri tabanını ancak bir geçerli durumdan bir diğer geçerli duruma güncelleyebilir.
+
+Isolation: Transaction’ların güvenli ve bağımsız bir şekilde işletilmesi prensibidir. Bu prensip sıralamayla ilgilenmez.Bir transaction, henüz tamamlanmamış bir başka transaction’ın verisini okuyamaz.
+
+Durability: Commit edilerek tamamlanmış transaction’ların verisinin kararlı, dayanıklı ve sürekliliği garanti edilmiş bir ortamda (sabit disk gibi) saklanmasıdır. Donanım arızası gibi beklenmedik durumlarda transaction log ve alınan backup’lar da prensibe bağlılık adına önem arz etmektedir.
 Saga Pattern Nedir?
 Saga Pattern ile oluşturulan sistemlerde gelen istek ile daha sonraki her adım, bir önceki adımın başarılı şekilde tamamlanması sonrasında tetiklenir. Herhangi bir failover durumunda işlemi geri alma veya bir düzeltme aksiyonu almayı sağlayan pattern’dir.
 SAGA TÜRLERİ
