@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
-    public class OrderCreatedEvent : IOrderCreatedEvent
+    public class OrderCreatedEvent 
     {
         public List<OrderItemMessage> OrderItems { get; set; }
     }

@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using MassTransit;
 
 namespace Shared.Interfaces
 {
-    public interface IOrderCreatedEvent
+    public interface IOrderCreatedEvent : CorrelatedBy<Guid>
     {
         List<OrderItemMessage> OrderItems { get; set; }
     }
