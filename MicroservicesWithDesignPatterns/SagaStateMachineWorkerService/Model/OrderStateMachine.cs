@@ -27,7 +27,7 @@ namespace SagaStateMachineWorkerService.Model
                 context.Instance.Expiration = context.Data.Payment.Expiration;
                 context.Instance.TotalPrice = context.Data.Payment.TotalPrice;
             }).Then(context => {Console.WriteLine($"OrderCreatedRequestEvent before : {context.Instance}");})
-                .Publish(context => new OrderCreatedEvent(){ OrderItems = context.Data.OrderItems})
+                .Publish(context => new OrderCreatedEvent(context.Instance.CorrelationId){ OrderItems = context.Data.OrderItems})
                 .TransitionTo(OrderCreated)
                 .Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }));
         }
