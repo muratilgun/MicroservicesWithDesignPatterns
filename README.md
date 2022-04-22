@@ -59,3 +59,5 @@ Akışımızda oluşacak bir hata durumunda failover sürecinden bahsetmek gerek
 * Yeni step’ler eklendiğinde işlem karmaşıklığı cherography yaklaşımına göre daha az kompleksleşir.
 * Birbirini bekleyen işlemleri bu yaklaşım ile yönetebilirsiniz.
 * Fazladan bir service’i yönetmeniz gerektiği için sisteminizdeki infrastructure karmaşıklığı artacaktır.
+
+https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga#:~:text=The%20Saga%20design%20pattern%20is,trigger%20the%20next%20transaction%20step.
