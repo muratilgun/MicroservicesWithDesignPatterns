@@ -8,7 +8,9 @@ namespace SagaStateMachineWorkerService.Model
     public class OrderStateMachine : MassTransitStateMachine<OrderStateInstance>
     {
         public Event<IOrderCreatedRequestEvent> OrderCreatedRequestEvent { get; set; }
+        public Event<IStockReservedEvent> StockReservedEvent { get; set; }
         public State OrderCreated { get; private set; }
+        public State StockReserved { get; private set; }
 
         public OrderStateMachine()
         {
@@ -30,6 +32,21 @@ namespace SagaStateMachineWorkerService.Model
                 .Publish(context => new OrderCreatedEvent(context.Instance.CorrelationId){ OrderItems = context.Data.OrderItems})
                 .TransitionTo(OrderCreated)
                 .Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }));
+
+            During(OrderCreated,When(StockReservedEvent)
+                .TransitionTo(StockReserved)
+                .Send(new Uri($"queue:{RabbitMQSettingsConst.PaymentStockReservedRequestQueueName}"),context => new StockReservedRequestPayment(context.Instance.CorrelationId)
+                {
+                    OrderItems = context.Data.OrderItems,
+                    Payment = new PaymentMessage()
+                    {
+                        CardName = context.Instance.CardName,
+                        CardNumber = context.Instance.CardNumber,
+                        CVV = context.Instance.CVV,
+                        Expiration = context.Instance.Expiration,
+                        TotalPrice = context.Instance.TotalPrice
+                    }
+                }).Then(context => { Console.WriteLine($"StockReservedEvent after : {context.Instance}"); }));
         }
     }
 }
