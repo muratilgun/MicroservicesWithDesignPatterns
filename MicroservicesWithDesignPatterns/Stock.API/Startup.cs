@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared;
+using Stock.API.Consumers;
 using Stock.API.Models;
 
 namespace Stock.API
@@ -32,9 +33,15 @@ namespace Stock.API
         {
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((contex, cfg) =>
+                x.AddConsumer<OrderCreatedEventConsumer>();
+
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(Configuration.GetConnectionString("RabbitMQ"));
+                    cfg.ReceiveEndpoint(RabbitMQSettingsConst.StockOrderCreatedEventQueueName, e =>
+                    {
+                        e.ConfigureConsumer<OrderCreatedEventConsumer>(context);
+                    });
                 });
             });
             services.AddMassTransitHostedService();
