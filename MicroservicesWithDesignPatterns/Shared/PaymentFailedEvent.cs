@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Shared.Interfaces;
 
 namespace Shared
 {
-    public class PaymentFailedEvent
+    public class PaymentFailedEvent : IPaymentFailedEvent
     {
-        public int OrderId { get; set; }
-        public string BuyerId { get; set; }
-        public string Message { get; set; }
-        public List<OrderItemMessage> OrderItems { get; set; }
+    public PaymentFailedEvent(Guid correlationId)
+    {
+        CorrelationId = correlationId;
+    }
+
+    public string Reason { get; set; }
+    public List<OrderItemMessage> OrderItems { get; set; }
+
+    public Guid CorrelationId { get; }
     }
 }
