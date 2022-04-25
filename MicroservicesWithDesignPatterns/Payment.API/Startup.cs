@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MassTransit;
 using Shared;
+using Payment.API.Consumer;
 
 namespace Payment.API
 {
@@ -30,9 +31,14 @@ namespace Payment.API
         {
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((contex, cfg) =>
+                x.AddConsumer<StockReservedRequestPaymentConsumer>();
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(Configuration.GetConnectionString("RabbitMQ"));
+                    cfg.ReceiveEndpoint(RabbitMQSettingsConst.PaymentStockReservedRequestQueueName, e =>
+                    {
+                        e.ConfigureConsumer<StockReservedRequestPaymentConsumer>(context);
+                    });
                 });
             });
             services.AddControllers();
