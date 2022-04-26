@@ -56,7 +56,7 @@ namespace SagaStateMachineWorkerService.Model
                         TotalPrice = context.Instance.TotalPrice
                     }
                 }).Then(context => { Console.WriteLine($"StockReservedEvent after : {context.Instance}"); }),
-                When(StockNotReservedEvent).TransitionTo(StockNotReserved));
+                When(StockNotReservedEvent).TransitionTo(StockNotReserved).Publish(context => new OrderRequestFailedEvent(){ OrderId = context.Instance.OrderId, Reason = context.Data.Reason}).Then(context => { Console.WriteLine($"StockNotReservedEvent after : {context.Instance}"); }));
 
             During(StockReserved,When(PaymentCompletedEvent).TransitionTo(PaymentCompleted).Publish(context => new OrderRequestCompletedEvent(){OrderId = context.Instance.OrderId}).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }).Finalize());
         }
