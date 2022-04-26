@@ -15,6 +15,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Order.API.Models;
 using Shared;
+using Order.API.Consumer;
 
 namespace Order.API
 {
@@ -32,9 +33,14 @@ namespace Order.API
         {
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<OrderRequestCompletedEventConsumer>();
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(Configuration.GetConnectionString("RabbitMQ"));
+                    cfg.ReceiveEndpoint(RabbitMQSettingsConst.OrderRequestCompletedEventQueueName, x =>
+                    {
+                        x.ConfigureConsumer<OrderRequestCompletedEventConsumer>(context);
+                    });
                 });
             });
 
