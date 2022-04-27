@@ -34,6 +34,7 @@ namespace Stock.API
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<OrderCreatedEventConsumer>();
+                x.AddConsumer<StockRollBackMessageConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -41,6 +42,10 @@ namespace Stock.API
                     cfg.ReceiveEndpoint(RabbitMQSettingsConst.StockOrderCreatedEventQueueName, e =>
                     {
                         e.ConfigureConsumer<OrderCreatedEventConsumer>(context);
+                    });
+                    cfg.ReceiveEndpoint(RabbitMQSettingsConst.StockRollBackMessageQueueName, e =>
+                    {
+                        e.ConfigureConsumer<StockRollBackMessageConsumer>(context);
                     });
                 });
             });

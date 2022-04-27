@@ -3,6 +3,7 @@ using Automatonymous;
 using Shared;
 using Shared.Events;
 using Shared.Interfaces;
+using Shared.Messages;
 
 namespace SagaStateMachineWorkerService.Model
 {
@@ -14,8 +15,8 @@ namespace SagaStateMachineWorkerService.Model
         public Event<IPaymentCompletedEvent> PaymentCompletedEvent { get; set; }
         public Event<IPaymentFailedEvent> PaymentFailedEvent { get; set; }
         public State OrderCreated { get; private set; }
-        public State StockReserved { get; private set; } 
-        public State StockNotReserved { get; private set; } 
+        public State StockReserved { get; private set; }
+        public State StockNotReserved { get; private set; }
         public State PaymentCompleted { get; private set; }
         public State PaymentFailed { get; private set; }
 
@@ -39,14 +40,14 @@ namespace SagaStateMachineWorkerService.Model
                 context.Instance.CVV = context.Data.Payment.CVV;
                 context.Instance.Expiration = context.Data.Payment.Expiration;
                 context.Instance.TotalPrice = context.Data.Payment.TotalPrice;
-            }).Then(context => {Console.WriteLine($"OrderCreatedRequestEvent before : {context.Instance}");})
-                .Publish(context => new OrderCreatedEvent(context.Instance.CorrelationId){ OrderItems = context.Data.OrderItems})
+            }).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent before : {context.Instance}"); })
+                .Publish(context => new OrderCreatedEvent(context.Instance.CorrelationId) { OrderItems = context.Data.OrderItems })
                 .TransitionTo(OrderCreated)
                 .Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }));
 
-            During(OrderCreated,When(StockReservedEvent)
+            During(OrderCreated, When(StockReservedEvent)
                 .TransitionTo(StockReserved)
-                .Send(new Uri($"queue:{RabbitMQSettingsConst.PaymentStockReservedRequestQueueName}"),context => new StockReservedRequestPayment(context.Instance.CorrelationId)
+                .Send(new Uri($"queue:{RabbitMQSettingsConst.PaymentStockReservedRequestQueueName}"), context => new StockReservedRequestPayment(context.Instance.CorrelationId)
                 {
                     OrderItems = context.Data.OrderItems,
                     Payment = new PaymentMessage()
@@ -58,11 +59,17 @@ namespace SagaStateMachineWorkerService.Model
                         TotalPrice = context.Instance.TotalPrice
                     }
                 }).Then(context => { Console.WriteLine($"StockReservedEvent after : {context.Instance}"); }),
-                When(StockNotReservedEvent).TransitionTo(StockNotReserved).Publish(context => new OrderRequestFailedEvent(){ OrderId = context.Instance.OrderId, Reason = context.Data.Reason}).Then(context => { Console.WriteLine($"StockNotReservedEvent after : {context.Instance}"); }));
+                When(StockNotReservedEvent).TransitionTo(StockNotReserved).Publish(context => new OrderRequestFailedEvent() { OrderId = context.Instance.OrderId, Reason = context.Data.Reason }).Then(context => { Console.WriteLine($"StockNotReservedEvent after : {context.Instance}"); }));
 
             During(StockReserved,
-                When(PaymentCompletedEvent).TransitionTo(PaymentCompleted).Publish(context => new OrderRequestCompletedEvent(){OrderId = context.Instance.OrderId}).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }).Finalize(),
-                When(PaymentFailedEvent).TransitionTo(PaymentFailed).Publish(context => new OrderRequestFailedEvent() { OrderId = context.Instance.OrderId, Reason = context.Data.Reason }));
+                When(PaymentCompletedEvent).TransitionTo(PaymentCompleted).Publish(context => new OrderRequestCompletedEvent() { OrderId = context.Instance.OrderId }).Then(context => { Console.WriteLine($"PaymentCompletedEvent After : {context.Instance}"); }).Finalize(),
+                When(PaymentFailedEvent)
+                    .Publish(context => new OrderRequestFailedEvent() { OrderId = context.Instance.OrderId, Reason = context.Data.Reason })
+                    .Send(new Uri($"queue:{RabbitMQSettingsConst.StockRollBackMessageQueueName}"), context => new StockRollBackMessage() { OrderItems = context.Data.OrderItems }).TransitionTo(PaymentFailed).Then(context => { Console.WriteLine($"PaymentFailedEvent After : {context.Instance}"); })
+
+            );
+
+            SetCompletedWhenFinalized();
         }
     }
 }

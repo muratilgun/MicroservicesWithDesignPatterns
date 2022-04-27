@@ -9,7 +9,7 @@ namespace Shared
     public class RabbitMQSettingsConst
     {
         public const string OrderSaga = "order-saga-queue";
-
+        public const string StockRollBackMessageQueueName = "stock-rollback-queue";
         public const string StockReservedEventQueueName = "stock-reserved-queue";
         public const string OrderStockNotReservedEventQueueName = "order-stock-not-reserved-queue";
         public const string StockPaymentFailedEventQueueName = "stock-payment-failed-queue";
