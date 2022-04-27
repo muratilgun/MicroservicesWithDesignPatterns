@@ -12,10 +12,12 @@ namespace SagaStateMachineWorkerService.Model
         public Event<IStockReservedEvent> StockReservedEvent { get; set; }
         public Event<IStockNotReservedEvent> StockNotReservedEvent { get; set; }
         public Event<IPaymentCompletedEvent> PaymentCompletedEvent { get; set; }
+        public Event<IPaymentFailedEvent> PaymentFailedEvent { get; set; }
         public State OrderCreated { get; private set; }
         public State StockReserved { get; private set; } 
         public State StockNotReserved { get; private set; } 
         public State PaymentCompleted { get; private set; }
+        public State PaymentFailed { get; private set; }
 
         public OrderStateMachine()
         {
@@ -58,7 +60,9 @@ namespace SagaStateMachineWorkerService.Model
                 }).Then(context => { Console.WriteLine($"StockReservedEvent after : {context.Instance}"); }),
                 When(StockNotReservedEvent).TransitionTo(StockNotReserved).Publish(context => new OrderRequestFailedEvent(){ OrderId = context.Instance.OrderId, Reason = context.Data.Reason}).Then(context => { Console.WriteLine($"StockNotReservedEvent after : {context.Instance}"); }));
 
-            During(StockReserved,When(PaymentCompletedEvent).TransitionTo(PaymentCompleted).Publish(context => new OrderRequestCompletedEvent(){OrderId = context.Instance.OrderId}).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }).Finalize());
+            During(StockReserved,
+                When(PaymentCompletedEvent).TransitionTo(PaymentCompleted).Publish(context => new OrderRequestCompletedEvent(){OrderId = context.Instance.OrderId}).Then(context => { Console.WriteLine($"OrderCreatedRequestEvent after : {context.Instance}"); }).Finalize(),
+                When(PaymentFailedEvent).TransitionTo(PaymentFailed).Publish(context => new OrderRequestFailedEvent() { OrderId = context.Instance.OrderId, Reason = context.Data.Reason }));
         }
     }
 }
