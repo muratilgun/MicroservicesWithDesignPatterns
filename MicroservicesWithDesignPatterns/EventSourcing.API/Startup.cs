@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EventSourcing.API.EventStores;
 
 namespace EventSourcing.API
 {
@@ -32,6 +33,7 @@ namespace EventSourcing.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventSourcing.API", Version = "v1" });
             });
+            services.AddEventStore(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

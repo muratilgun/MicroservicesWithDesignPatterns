@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EventStores\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\EventSourcing.Shared\EventSourcing.Shared.csproj" />
   </ItemGroup>
 
