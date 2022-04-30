@@ -34,6 +34,7 @@ namespace EventSourcing.API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventSourcing.API", Version = "v1" });
             });
             services.AddEventStore(Configuration);
+            services.AddSingleton<ProductStream>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
