@@ -13,7 +13,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using EventSourcing.API.EventStores;
+using EventSourcing.API.Models;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventSourcing.API
 {
@@ -29,7 +31,10 @@ namespace EventSourcing.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("SqlConnection"));
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
