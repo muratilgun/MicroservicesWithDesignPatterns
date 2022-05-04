@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using EventSourcing.API.BackgroundServices;
 using EventSourcing.API.EventStores;
 using EventSourcing.API.Models;
 using MediatR;
@@ -43,6 +44,7 @@ namespace EventSourcing.API
             services.AddEventStore(Configuration);
             services.AddSingleton<ProductStream>();
             services.AddMediatR(Assembly.GetExecutingAssembly());
+            services.AddHostedService<ProductReadModelEventStore>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
