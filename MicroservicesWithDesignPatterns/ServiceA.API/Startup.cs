@@ -32,6 +32,10 @@ namespace ServiceA.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ServiceA.API", Version = "v1" });
             });
+            services.AddHttpClient<ProductService>(opt =>
+            {
+                opt.BaseAddress = new Uri("https://localhost:5003/api/products/");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
