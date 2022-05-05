@@ -38,6 +38,23 @@ namespace ServiceA.API
             }).AddPolicyHandler(GetRetryPolicy()); 
         }
 
+        private IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions.HandleTransientHttpError().CircuitBreakerAsync(3,TimeSpan.FromSeconds(10),onBreak:
+                (arg1,arg2) =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Break");
+                }, onReset: () =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Reset");
+                },onHalfOpen : () =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Half Open");
+
+                });
+        }
+
+
         private IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
             return HttpPolicyExtensions.HandleTransientHttpError().OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound).WaitAndRetryAsync(5, retryAttempt =>
@@ -53,6 +70,8 @@ namespace ServiceA.API
 
             return Task.CompletedTask;
         }
+
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
