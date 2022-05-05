@@ -35,7 +35,7 @@ namespace ServiceA.API
             services.AddHttpClient<ProductService>(opt =>
             {
                 opt.BaseAddress = new Uri("https://localhost:5003/api/products/");
-            }).AddPolicyHandler(GetRetryPolicy()); 
+            }).AddPolicyHandler(GetAdvenceCircuitBreakerPolicy()); 
         }
 
         private IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
@@ -54,6 +54,21 @@ namespace ServiceA.API
                 });
         }
 
+        private IAsyncPolicy<HttpResponseMessage> GetAdvenceCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions.HandleTransientHttpError().AdvancedCircuitBreakerAsync(0.1,TimeSpan.FromSeconds(30),4,TimeSpan.FromSeconds(30), onBreak:
+                (arg1, arg2) =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Break");
+                }, onReset: () =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Reset");
+                }, onHalfOpen: () =>
+                {
+                    Debug.WriteLine("Circuit Breaker Status => On Half Open");
+
+                });
+        }
 
         private IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
