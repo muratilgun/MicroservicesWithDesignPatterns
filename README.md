@@ -60,6 +60,27 @@ Akışımızda oluşacak bir hata durumunda failover sürecinden bahsetmek gerek
 * Birbirini bekleyen işlemleri bu yaklaşım ile yönetebilirsiniz.
 * Fazladan bir service’i yönetmeniz gerektiği için sisteminizdeki infrastructure karmaşıklığı artacaktır.
 
+### Event Sourcing Nedir?
+Event sourcing; bir objenin son durumunu saklamak yerine,objenin durum değişikliğine neden olan tüm olaylarının kayıt altına alınmasıdır.
+
+Burada event diye bahsettiğimiz şey geçmişte olan olaylardır:siparisOlusturuldu, paraYatirildi gibi aksiyonlar birer eventtir.
+
+Objenin son durumununa ulaşmak için o obje ile ilgili kayıt altına alınan tüm eventleri birleştirmek gerekir.Bu eventler sadece create edilebilir, update edilemez.Eventler immutabledır.
+```
+10 numaralı banka hesabına 100 lira yatırıldı.
+
+10 numaralı banka hesabından 20 lira çekildi.
+
+10 numaralı banka hesabına 30 lira yatırıldı.
+```
+Klasik yöntemde burda sadece 10 numaralı banka hesabında 110 lira olduğunu ifade eden single entity record olarak adlandırılan tek bir satır olması gerekirdi.
+
+Event sourcing yöntemi ile objenin(entity) son durumu bu eventlerin hepsinin hesaplanmasıyla elde ediliyor.
+
+Single entity record şeklinde tutulduğunda commit edilmiş işlemlerde geri dönemezken(rollback) burada veri audit log gibi tutulduğu için belirli bir andaki objenin durumuna geri dönebiliriz.
+
+Rollback yapmak için hangi state’e dönülmek isteniyorsa o eventin silinmesi yeterlidir.Yani işlemin sonraki adımlarında bir hata olduğunda consistency’i sağlamak adına bu işlem yapılabilir.Bu işlemin ilişkisel veritabanlarındaki consistency özelliğinden farkı, anında olmayıp belirli bir zaman geçtikten sonra da olabilmesidir, buna eventual consistency deniliyor.Yani belirli bir zaman sonra consistency sağlanacak demek oluyor.(idealde saniyeler seviyesinde olmalı)
+
 https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga#:~:text=The%20Saga%20design%20pattern%20is,trigger%20the%20next%20transaction%20step.
 
 https://www.c-sharpcorner.com/article/microservices-architecture-pattern-saga/
